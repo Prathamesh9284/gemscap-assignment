@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantitative Trading Analytics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📊 Quantitative Trading Analytics</h1>
+            <div class="status-indicator">
+                <span id="apiStatus" class="status-dot offline"></span>
+                <span id="apiStatusText">Offline</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="stream">🏠 Home</button>
+            <button class="tab-btn" data-tab="data">📊 Data Analysis</button>
+        </nav>
+
+        <!-- Tab Content: Home -->
+        <div id="streamTab" class="tab-content active">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2>📊 Live Market Data</h2>
+                        <!-- <p style="color: #6b7280; margin-top: 8px;">Real-time price streaming via WebSocket</p> -->
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input 
+                            type="text" 
+                            id="newSymbolInput" 
+                            placeholder="Add symbol (e.g., solusdt)"
+                            style="padding: 10px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; width: 200px;"
+                        >
+                        <button id="addSymbolBtn" class="btn btn-primary" style="white-space: nowrap;">➕ Add Symbol</button>
+                    </div>
+                </div>
+                
+                <!-- Live Symbol Cards -->
+                <div id="latestTicksList" class="ticks-grid"></div>
+                
+                <!-- Stream Statistics -->
+                <!-- <div class="stream-stats-horizontal" style="margin-top: 32px;">
+                    <div class="stat-card">
+                        <h3>Status</h3>
+                        <p id="streamStatus">Stopped</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Ticks</h3>
+                        <p id="tickCount">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Buffer Size</h3>
+                        <p id="bufferSize">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Watching</h3>
+                        <p id="activeSymbols">-</p>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Tab Content: Data Analysis -->
+        <div id="dataTab" class="tab-content">
+            <div class="card" style="position: relative;">
+                <div style="margin-bottom: 24px;">
+                    <h2>📊 OHLCV Data Visualization</h2>
+                    
+                    <!-- Alerts Button - Top Right Corner -->
+                    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+                        <button id="viewAlertsBtn" class="btn btn-primary" style="padding: 8px 16px;">🔔 Alerts</button>
+                    </div>
+                    
+                    <!-- Hidden triggered alerts container -->
+                    <div id="triggeredAlerts" class="triggered-alerts" style="display: none;"></div>
+                </div>
+                
+                <div style="display: flex; gap: 16px; align-items: flex-end; margin-bottom: 16px;">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="dataSymbol">Symbol:</label>
+                        <select id="dataSymbol">
+                            <option value="">Select symbol...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="dataInterval">Interval:</label>
+                        <select id="dataInterval">
+                            <option value="1s">1 Second</option>
+                            <option value="1min" selected>1 Minute</option>
+                            <option value="5min">5 Minutes</option>
+                            <option value="15min">15 Minutes</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="4h">4 Hours</option>
+                        </select>
+                    </div>
+                    <button id="exportOHLCVBtn" class="btn btn-secondary" style="margin: 0;">📥 Export CSV</button>
+                </div>
+
+                <div id="ohlcvChart" class="chart-container"></div>
+
+                <div class="summary-section" id="summarySection" style="display: none;">
+                    <h3>Summary Statistics</h3>
+                    <div class="stats-grid" id="statsGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Creation Dialog (Hidden by default) -->
+        <!-- View Alerts Dialog -->
+        <div id="viewAlertsDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 12px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="margin: 0;">🔔 Price Alerts</h3>
+                    <button id="createAlertBtn" class="btn btn-success" style="padding: 8px 16px;">➕ Create Alert</button>
+                </div>
+                
+                <!-- Existing Alerts List -->
+                <div id="alertsList" class="alerts-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; background: #f9f9f9; min-height: 200px;"></div>
+                
+                <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                    <button id="closeViewAlertsBtn" class="btn btn-danger">❌ Close</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create Alert Dialog -->
+        <div id="createAlertDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2001; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%;">
+                <h3 style="margin-bottom: 24px;">➕ Create New Alert</h3>
+                
+                <div class="form-group">
+                    <label for="alertName">Alert Name:</label>
+                    <input type="text" id="alertName" placeholder="e.g., BTC High Price Alert">
+                </div>
+                <div class="form-group">
+                    <label for="alertSymbol">Symbol:</label>
+                    <select id="alertSymbol">
+                        <option value="">Select symbol...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alertMetric">Metric:</label>
+                    <select id="alertMetric">
+                        <option value="price">Price</option>
+                        <option value="zscore">Z-Score</option>
+                        <option value="correlation">Correlation</option>
+                        <option value="spread">Spread</option>
+                        <option value="hedge_ratio">Hedge Ratio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alertOperator">Condition:</label>
+                    <select id="alertOperator">
+                        <option value="gt">Greater Than (>)</option>
+                        <option value="lt">Less Than (<)</option>
+                        <option value="gte">Greater or Equal (≥)</option>
+                        <option value="lte">Less or Equal (≤)</option>
+                        <option value="eq">Equal (=)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alertThreshold">Threshold Value:</label>
+                    <input type="number" id="alertThreshold" step="0.01" placeholder="e.g., 2.0">
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button id="saveAlertBtn" class="btn btn-success" style="flex: 1;">✅ Save Alert</button>
+                    <button id="cancelCreateAlertBtn" class="btn btn-danger" style="flex: 1;">❌ Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

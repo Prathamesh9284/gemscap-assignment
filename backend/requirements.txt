@@ -1,0 +1,12 @@
+fastapi>=0.104.0              # Modern async web framework
+uvicorn[standard]>=0.24.0     # ASGI server with WebSocket support
+pydantic>=2.4.0               # Data validation and settings management
+
+pandas>=2.0.0                 # Data manipulation and time-series analysis
+numpy>=1.24.0                 # Numerical computing
+scipy>=1.11.0                 # Scientific computing and statistics
+statsmodels>=0.14.0           # Statistical models (OLS, ADF test)
+
+requests>=2.31.0              # HTTP library
+python-dateutil>=2.8.2        # Date/time utilities
+
