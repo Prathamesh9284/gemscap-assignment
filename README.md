@@ -14,7 +14,7 @@ A real-time cryptocurrency trading analytics platform with WebSocket streaming, 
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](https://drive.google.com/uc?export=view&id=1h3GM0Z8cpMrzHajO3F3qnYuxUG2ZBRyL)
+![Architecture Diagram](https://drive.google.com/file/d/17E9KsCLw7uoFJd8Cr8TEiYTxIB_-7VZx/view?usp=sharing)
 
 ### Backend (FastAPI)
 - **WebSocket Collector**: Connects to Binance Futures WebSocket streams
